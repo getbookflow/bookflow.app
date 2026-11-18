@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0F1E3D">
+  <meta name="description" content="BookFlow : la plateforme pour gérer vos clients et vos réservations">
+  <title>BookFlow | Gestion d’entreprise</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header class="band">
+    <div class="band-in">
+      <div class="bar">
+        <div class="brand">BookFlow<i>.</i></div>
+
+        <div class="settings">
+          <select id="language" aria-label="Langue" onchange="changeLanguage()">
+            <option value="fr">Français</option>
+            <option value="en">English</option>
+          </select>
+
+          <select id="currency" aria-label="Devise" onchange="changeCurrency()">
+            <option value="USD">USD $</option>
+            <option value="EUR">EUR €</option>
+            <option value="GBP">GBP £</option>
+            <option value="MGA">MGA Ar</option>
+            <option value="CAD">CAD $</option>
+            <option value="AUD">AUD $</option>
+            <option value="CHF">CHF</option>
+            <option value="XOF">XOF CFA</option>
+          </select>
+
+          <button type="button" class="ghost-btn" id="themeToggle">🌙 Mode sombre</button>
+        </div>
+      </div>
+
+      <div class="intro">
+        <h1 id="welcome">Gérez votre entreprise partout dans le monde.</h1>
+        <p id="description">La plateforme intelligente pour gérer vos clients et réservations.</p>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+
+    <!-- Compte entreprise -->
+    <section class="card" id="authSection">
+      <h2>Votre compte entreprise</h2>
+      <p class="sub auth-intro">Connectez-vous pour gérer vos clients, vos réservations et votre équipe.</p>
+
+      <div class="auth-grid">
+        <form id="loginForm" novalidate>
+          <h3>Déjà inscrit ? Se connecter</h3>
+          <div class="field">
+            <label for="loginEmail">Adresse e-mail</label>
+            <input type="email" id="loginEmail" autocomplete="email">
+          </div>
+          <div class="field">
+            <label for="loginPassword">Mot de passe</label>
+            <input type="password" id="loginPassword" autocomplete="current-password">
+          </div>
+          <button type="button" class="link-btn" id="forgotLink">Mot de passe oublié ?</button>
+          <button type="submit" class="btn">Se connecter</button>
+        </form>
+
+        <form id="signupForm" novalidate>
+          <h3>Créer un compte entreprise</h3>
+          <div class="field">
+            <label for="companyName">Nom de votre entreprise</label>
+            <input type="text" id="companyName" autocomplete="organization">
+          </div>
+          <div class="field">
+            <label for="signupEmail">Adresse e-mail</label>
+            <input type="email" id="signupEmail" autocomplete="email">
+          </div>
+          <div class="field">
+            <label for="signupPassword">Mot de passe (6 caractères minimum)</label>
+            <input type="password" id="signupPassword" autocomplete="new-password">
+          </div>
+          <button type="submit" class="btn ghost">Créer mon compte</button>
+        </form>
+
+        <form id="resetForm" novalidate hidden>
+          <h3>Mot de passe oublié</h3>
+          <p class="sub">Entrez votre adresse e-mail : nous vous envoyons un lien pour choisir un nouveau mot de passe.</p>
+          <div class="field">
+            <label for="resetEmail">Adresse e-mail</label>
+            <input type="email" id="resetEmail" autocomplete="email">
+          </div>
+          <button type="submit" class="btn">Envoyer le lien</button>
+          <button type="button" class="link-btn" id="backToLogin">Retour à la connexion</button>
+        </form>
+
+        <form id="recoveryForm" novalidate hidden>
+          <h3>Nouveau mot de passe</h3>
+          <div class="field">
+            <label for="newPassword">Nouveau mot de passe (6 caractères minimum)</label>
+            <input type="password" id="newPassword" autocomplete="new-password">
+          </div>
+          <div class="field">
+            <label for="newPassword2">Confirmer le mot de passe</label>
+            <input type="password" id="newPassword2" autocomplete="new-password">
+          </div>
+          <button type="submit" class="btn">Enregistrer le mot de passe</button>
+        </form>
+      </div>
+
+      <p class="msg" id="authMessage" role="status" aria-live="polite" data-type=""></p>
+      <button type="button" class="btn ghost sm" id="logoutButton" hidden>Se déconnecter</button>
+    </section>
+
+    <!-- Tout ce bloc apparaît après la connexion -->
+    <div class="app-area" id="appArea">
+
+      <nav class="sections" aria-label="Sections">
+        <a href="#adminSection" id="navAdmin" hidden>Administration</a>
+        <a href="#dashboard">Tableau de bord</a>
+        <a href="#clientsSection">Clients</a>
+        <a href="#servicesSection">Services</a>
+        <a href="#bookingsSection">Réservations</a>
+        <a href="#pricing">Abonnements</a>
+      </nav>
+
+      <!-- Administration BookFlow (visible seulement pour l’administrateur, en priorité) -->
+      <section class="card admin" id="adminSection" hidden>
+        <div class="admin-head">
+          <div>
+            <h2>Administration BookFlow</h2>
+            <p class="sub">Revenus des abonnements et paiements à valider.</p>
+          </div>
+          <button type="button" class="btn ghost sm" id="adminRefresh">Actualiser</button>
+        </div>
+
+        <div class="stats" id="adminStats"></div>
+
+        <h3 class="list-title">À valider <span class="count" id="pendingCount">0</span></h3>
+        <div id="paymentRequestsList"></div>
+
+        <details class="history">
+          <summary>Historique des demandes</summary>
+          <div id="paymentHistoryList"></div>
+        </details>
+      </section>
+
+      <!-- Tableau de bord -->
+      <section class="card" id="dashboard">
+        <h2 id="dashboardTitle">Tableau de bord</h2>
+        <div id="subscriptionInfo">Chargement de votre abonnement...</div>
+
+        <div class="calls-panel">
+          <div>
+            <h3>Appels et alertes en direct</h3>
+            <p>Un client vous appelle depuis votre page de réservation ? L’appel arrive ici, sans quitter votre travail. Gardez cette page ouverte.</p>
+          </div>
+          <span class="badge" id="callBadge" data-state="off">Déconnecté</span>
+          <button type="button" class="btn ghost sm" id="enableNotifs" hidden>Activer les notifications</button>
+        </div>
+
+        <div class="share" id="publicBookingLinkSection">
+          <h3>Mon lien de réservation public</h3>
+          <p>Partagez ce lien avec vos clients : ils créent un compte, réservent et peuvent vous appeler.</p>
+          <div class="copy-row">
+            <input type="text" id="publicBookingLink" readonly aria-label="Lien de réservation public">
+            <button type="button" class="btn sm" id="copyBookingLink">Copier mon lien</button>
+          </div>
+          <p class="msg" id="bookingLinkMessage" role="status" aria-live="polite" data-type=""></p>
+        </div>
+
+        <div class="stats">
+          <div class="stat">
+            <p id="clientsLabel">Clients</p>
+            <h3 id="clients">0</h3>
+          </div>
+          <div class="stat">
+            <p id="bookingsLabel">Réservations</p>
+            <h3 id="bookings">0</h3>
+          </div>
+        </div>
+
+        <div id="advancedStats" class="subblock" hidden>
+          <h3>Statistiques avancées</h3>
+          <div class="stats">
+            <div class="stat">
+              <p>Réservations ce mois</p>
+              <h3 id="monthlyBookings">0</h3>
+            </div>
+            <div class="stat">
+              <p>Réservations à venir</p>
+              <h3 id="upcomingBookings">0</h3>
+            </div>
+          </div>
+        </div>
+
+        <div id="activityReports" class="subblock" hidden>
+          <h3>Rapports d’activité</h3>
+          <div class="stats">
+            <div class="stat">
+              <p>Total des clients ajoutés</p>
+              <h3 id="reportClients">0</h3>
+            </div>
+            <div class="stat">
+              <p>Total des réservations créées</p>
+              <h3 id="reportBookings">0</h3>
+            </div>
+          </div>
+          <h4>Activité des réservations par mois</h4>
+          <div id="monthlyActivity"></div>
+        </div>
+
+        <button type="button" class="btn sm" id="addButton" onclick="addClient()">Ajouter un client</button>
+      </section>
+
+      <!-- Clients -->
+      <section class="card" id="clientsSection">
+        <h2 id="customerTitle">Gestion des clients</h2>
+        <p class="sub">Ajoutez vos clients pour pouvoir leur attribuer des réservations.</p>
+
+        <form id="customerForm">
+          <div class="field">
+            <label for="customerName">Nom du client</label>
+            <input type="text" id="customerName" required>
+          </div>
+          <div class="row">
+            <div class="field">
+              <label for="customerEmail">Adresse e-mail</label>
+              <input type="email" id="customerEmail" required>
+            </div>
+            <div class="field">
+              <label for="customerPhone">Téléphone</label>
+              <input type="tel" id="customerPhone" required>
+            </div>
+          </div>
+          <button type="submit" class="btn">Ajouter le client</button>
+        </form>
+
+        <h3 class="list-title">Liste des clients</h3>
+        <div id="customerList"></div>
+      </section>
+
+      <!-- Services -->
+      <section class="card" id="servicesSection">
+        <h2>Gestion des services</h2>
+        <p class="sub">Les services que vos clients peuvent choisir sur la page de réservation.</p>
+
+        <form id="serviceForm">
+          <div class="field">
+            <label for="serviceName">Nom du service</label>
+            <input type="text" id="serviceName" required>
+          </div>
+          <div class="field">
+            <label for="serviceDescription">Description</label>
+            <textarea id="serviceDescription" rows="3"></textarea>
+          </div>
+          <div class="row">
+            <div class="field">
+              <label for="servicePrice">Prix</label>
+              <input type="number" id="servicePrice" min="0" step="0.01" required>
+            </div>
+            <div class="field">
+              <label for="serviceDuration">Durée (minutes)</label>
+              <input type="number" id="serviceDuration" min="1" value="30" required>
+            </div>
+          </div>
+          <button type="submit" class="btn">Ajouter le service</button>
+        </form>
+
+        <div id="servicesList"></div>
+      </section>
+
+      <!-- Réservations -->
+      <section class="card" id="bookingsSection">
+        <h2>Gestion des réservations</h2>
+        <p class="sub">Ajoutez un rendez-vous vous-même ou suivez ceux de vos clients.</p>
+
+        <form id="bookingForm">
+          <div class="field">
+            <label for="bookingCustomer">Nom du client</label>
+            <input type="text" id="bookingCustomer" required>
+          </div>
+          <div class="row">
+            <div class="field">
+              <label for="bookingDate">Date</label>
+              <input type="date" id="bookingDate" required>
+            </div>
+            <div class="field">
+              <label for="bookingTime">Heure</label>
+              <input type="time" id="bookingTime" required>
+            </div>
+          </div>
+          <div class="field">
+            <label for="bookingDescription">Description</label>
+            <input type="text" id="bookingDescription">
+          </div>
+          <button type="submit" class="btn">Ajouter la réservation</button>
+        </form>
+
+        <div class="calendar">
+          <div class="calendar-header">
+            <button type="button" class="icon-btn" onclick="changeMonth(-1)" aria-label="Mois précédent">❮</button>
+            <h3 id="calendarMonth"></h3>
+            <button type="button" class="icon-btn" onclick="changeMonth(1)" aria-label="Mois suivant">❯</button>
+          </div>
+          <div class="calendar-grid" id="calendarDays"></div>
+        </div>
+
+        <div id="selectedDayBookings"></div>
+
+        <h3 class="list-title">Liste des réservations</h3>
+        <button type="button" class="btn ghost sm" id="showAllBookings" hidden
+          onclick="selectedCalendarDay = null; displayBookings(); this.hidden = true;">
+          Afficher toutes les réservations
+        </button>
+        <div id="bookingList"></div>
+
+        <div id="bookingHistorySection" class="subblock" hidden>
+          <h3>Historique des réservations</h3>
+          <div id="bookingHistory"></div>
+        </div>
+      </section>
+
+      <!-- Employés (selon l’abonnement) -->
+      <section class="card" id="employeeSection" hidden>
+        <h2>Gestion des employés</h2>
+        <p class="sub">Gérez les membres de votre équipe.</p>
+
+        <form id="employeeForm">
+          <div class="field">
+            <label for="employeeName">Nom de l’employé</label>
+            <input type="text" id="employeeName" required>
+          </div>
+          <div class="row">
+            <div class="field">
+              <label for="employeeEmail">Adresse e-mail</label>
+              <input type="email" id="employeeEmail">
+            </div>
+            <div class="field">
+              <label for="employeePhone">Téléphone</label>
+              <input type="tel" id="employeePhone">
+            </div>
+          </div>
+          <div class="field">
+            <label for="employeePosition">Poste occupé</label>
+            <input type="text" id="employeePosition">
+          </div>
+
+          <div id="advancedTeamFields" class="stack" hidden>
+            <div class="field">
+              <label for="employeeRole">Rôle</label>
+              <select id="employeeRole">
+                <option value="">Choisir un rôle</option>
+                <option value="Manager">Manager</option>
+                <option value="Responsable">Responsable</option>
+                <option value="Employé">Employé</option>
+                <option value="Assistant">Assistant</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="employeeResponsibilities">Responsabilités</label>
+              <textarea id="employeeResponsibilities" rows="3"></textarea>
+            </div>
+          </div>
+
+          <button type="submit" class="btn">Ajouter un employé</button>
+        </form>
+
+        <h3 class="list-title">Liste des employés</h3>
+        <div id="employeeList"></div>
+        <p class="msg" id="employeeMessage" role="status" aria-live="polite" data-type=""></p>
+      </section>
+
+    </div>
+
+    <!-- Abonnements -->
+    <section class="card" id="pricing">
+      <h2 id="pricingTitle">Nos abonnements</h2>
+      <p class="sub" id="pricingDescription">Un prix international unique, converti dans votre devise.</p>
+
+      <div class="plans">
+        <article class="plan">
+          <h3>Starter</h3>
+          <p class="price" id="price-Starter">9 USD / mois</p>
+          <ul>
+            <li>Gestion des clients</li>
+            <li>Gestion des réservations</li>
+            <li>Calendrier des réservations</li>
+            <li>Tableau de bord simple</li>
+          </ul>
+          <button type="button" class="btn ghost" onclick="subscribe('Starter')" id="button-Starter">Choisir Starter</button>
+        </article>
+
+        <article class="plan featured">
+          <span class="popular" id="popular">POPULAIRE</span>
+          <h3>Business</h3>
+          <p class="price" id="price-Business">19 USD / mois</p>
+          <ul>
+            <li>Tout Starter</li>
+            <li>Statistiques avancées</li>
+            <li>Historique des réservations</li>
+            <li>Gestion de plusieurs employés</li>
+            <li>Rapports d’activité</li>
+          </ul>
+          <button type="button" class="btn" onclick="subscribe('Business')" id="button-Business">Choisir Business</button>
+        </article>
+
+        <article class="plan">
+          <h3>Premium</h3>
+          <p class="price" id="price-Premium">39 USD / mois</p>
+          <ul>
+            <li>Tout Business</li>
+            <li>Gestion de plusieurs établissements</li>
+            <li>Gestion avancée des équipes</li>
+            <li>Rapports détaillés</li>
+            <li>Assistance prioritaire</li>
+          </ul>
+          <button type="button" class="btn ghost" onclick="subscribe('Premium')" id="button-Premium">Choisir Premium</button>
+        </article>
+      </div>
+
+      <p class="exchange" id="exchangeStatus">Chargement des taux de change...</p>
+    </section>
+
+    <!-- Confirmation de paiement MVola -->
+    <section class="card" id="paymentRequestSection" hidden>
+      <h2>Confirmation de paiement MVola</h2>
+      <p class="sub">Effectuez votre transfert au numéro :</p>
+      <p class="mvola">0387996554</p>
+      <p class="selected-plan" id="selectedPlanText"></p>
+
+      <form id="paymentRequestForm">
+        <div class="field">
+          <label for="paymentCustomerName">Votre nom</label>
+          <input type="text" id="paymentCustomerName" required>
+        </div>
+        <div class="field">
+          <label for="paymentPhone">Votre numéro MVola</label>
+          <input type="tel" id="paymentPhone" required>
+        </div>
+        <div class="field">
+          <label for="paymentReference">Référence du transfert MVola</label>
+          <input type="text" id="paymentReference" required>
+        </div>
+        <button type="submit" class="btn">Envoyer ma demande</button>
+      </form>
+
+      <p class="msg" id="paymentRequestMessage" role="status" aria-live="polite" data-type=""></p>
+    </section>
+
+    <!-- Paiements internationaux -->
+    <section class="card quiet">
+      <h2 id="paymentTitle">Paiements internationaux</h2>
+      <p class="sub" id="paymentDescription">Plusieurs moyens de paiement seront disponibles selon votre pays.</p>
+      <p id="paymentStatus">Les paiements réels seront activés après configuration.</p>
+    </section>
+
+  </main>
+
+  <footer>© 2026 BookFlow. Tous droits réservés.</footer>
+
+  <!-- Alertes à l’écran -->
+  <div class="toasts" id="toasts" aria-live="polite"></div>
+
+  <!-- Appel entrant -->
+  <div class="incoming" id="incomingCall" role="alertdialog" aria-label="Appel entrant" hidden>
+    <div class="incoming-pulse" aria-hidden="true">📞</div>
+    <div class="incoming-text">
+      <strong>Appel entrant</strong>
+      <span id="incomingName"></span>
+      <small id="incomingPhone"></small>
+    </div>
+    <div class="incoming-actions">
+      <button type="button" class="call-btn accept" id="answerBtn">Répondre</button>
+      <button type="button" class="call-btn decline" id="declineBtn">Refuser</button>
+    </div>
+  </div>
+
+  <!-- Barre d’appel en cours (reste visible pendant que vous travaillez) -->
+  <div class="callbar" id="callBar" hidden>
+    <div class="callbar-info">
+      <strong id="callWho"></strong>
+      <span id="callTimer">Connexion…</span>
+    </div>
+    <div class="callbar-actions">
+      <button type="button" class="cb-btn" id="callAddClient">Ajouter comme client</button>
+      <button type="button" class="cb-btn" id="callAddBooking">Noter une réservation</button>
+      <button type="button" class="cb-btn" id="muteBtn">Couper le micro</button>
+      <button type="button" class="cb-btn danger" id="hangupBtn">Raccrocher</button>
+    </div>
+  </div>
+
+  <audio id="remoteAudio" autoplay playsinline></audio>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="app.js"></script>
+  <script src="live.js"></script>
+  <script src="push.js"></script>
+  <script src="admin.js"></script>
+  <script>
+    // Affiche l’espace de gestion seulement quand l’utilisateur est connecté
+    (function () {
+      var logout = document.getElementById("logoutButton");
+      function sync() {
+        document.body.classList.toggle("is-auth", !logout.hidden);
+      }
+      sync();
+      new MutationObserver(sync).observe(logout, { attributes: true, attributeFilter: ["hidden"] });
+    })();
+  </script>
+</body>
+</html>
