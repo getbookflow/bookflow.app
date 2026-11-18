@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0F1E3D">
+<title>Réserver | BookFlow</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --band: #0F1E3D;
+    --ink: #0F1E3D;
+    --ink-2: #4A5873;
+    --paper: #F3F5FA;
+    --surface: #FFFFFF;
+    --line: #DCE2EE;
+    --brand: #2457E6;
+    --brand-ink: #FFFFFF;
+    --brand-soft: #E7EDFD;
+    --ok: #0F7B55;
+    --ok-soft: #E1F3EA;
+    --bad: #B42318;
+    --bad-soft: #FDECEA;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --band: #0A1020;
+      --ink: #E8EDF8;
+      --ink-2: #A3AFC6;
+      --paper: #0B1220;
+      --surface: #131C2E;
+      --line: #25324B;
+      --brand: #6B93FF;
+      --brand-ink: #0B1220;
+      --brand-soft: #1A2744;
+      --ok: #4CC79A;
+      --ok-soft: #10261F;
+      --bad: #FF8A7E;
+      --bad-soft: #2E1816;
+    }
+  }
+
+  * { box-sizing: border-box; margin: 0; }
+  [hidden] { display: none !important; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    font-family: "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    line-height: 1.5;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  body.in-call { padding-bottom: 130px; }
+
+  /* ----- Bandeau du haut ----- */
+  .band {
+    background: var(--band);
+    color: #fff;
+    padding: calc(14px + env(safe-area-inset-top, 0px)) 20px 76px;
+  }
+  .band-in { max-width: 560px; margin: 0 auto; }
+  .bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; }
+  .brand { font-weight: 800; font-size: 1.15rem; letter-spacing: -0.01em; }
+  .brand i { color: #7FA2FF; font-style: normal; }
+  .account { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .avatar {
+    width: 34px; height: 34px; border-radius: 50%; background: #2457E6; color: #fff;
+    display: grid; place-items: center; font-weight: 700; font-size: 0.8rem; flex: none;
+  }
+  .account-name {
+    font-size: 0.85rem; max-width: 110px; overflow: hidden;
+    text-overflow: ellipsis; white-space: nowrap; color: #DCE5F8;
+  }
+  .logout {
+    background: none; border: 1px solid rgba(255,255,255,0.4); color: #fff;
+    border-radius: 8px; padding: 0 12px; min-height: 36px;
+    font: inherit; font-size: 0.8rem; font-weight: 700; cursor: pointer;
+  }
+  .intro { padding-top: 30px; }
+  .intro h1 {
+    font-size: clamp(1.8rem, 7vw, 2.5rem); line-height: 1.1; font-weight: 800;
+    letter-spacing: -0.025em; overflow-wrap: anywhere;
+  }
+  .intro p { margin-top: 10px; color: #C4D0EA; max-width: 44ch; }
+
+  /* ----- Contenu ----- */
+  .wrap {
+    max-width: 560px; width: 100%; margin: -44px auto 0;
+    padding: 0 16px 40px; display: grid; gap: 16px; flex: 1;
+  }
+  .card {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: 16px; padding: 22px;
+  }
+  .card h2 { font-size: 1.2rem; font-weight: 800; letter-spacing: -0.01em; margin-bottom: 4px; }
+  .sub { color: var(--ink-2); font-size: 0.92rem; margin-bottom: 18px; }
+
+  /* ----- Onglets connexion / inscription ----- */
+  .seg { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; background: var(--paper); padding: 4px; border-radius: 12px; margin-bottom: 14px; }
+  .seg button {
+    min-height: 44px; border: 0; border-radius: 9px; background: transparent; color: var(--ink-2);
+    font: inherit; font-weight: 700; font-size: 0.92rem; cursor: pointer;
+  }
+  .seg button[aria-selected="true"] {
+    background: var(--surface); color: var(--ink);
+    box-shadow: 0 1px 3px rgba(15, 30, 61, 0.18);
+  }
+
+  /* ----- Formulaires ----- */
+  form { display: grid; gap: 16px; }
+  .field { display: grid; gap: 6px; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  label, legend { font-size: 0.85rem; font-weight: 700; color: var(--ink-2); }
+  input[type="text"], input[type="email"], input[type="password"], input[type="tel"],
+  input[type="date"], input[type="time"], textarea {
+    width: 100%; min-height: 48px; padding: 10px 14px;
+    border: 1.5px solid var(--line); border-radius: 10px;
+    background: var(--surface); color: var(--ink); font: inherit; font-size: 16px;
+  }
+  textarea { min-height: 84px; resize: vertical; }
+  input:focus-visible, textarea:focus-visible, button:focus-visible {
+    outline: 3px solid var(--brand); outline-offset: 2px;
+  }
+  fieldset { border: 0; padding: 0; min-width: 0; }
+  legend { margin-bottom: 8px; padding: 0; }
+
+  .btn {
+    --spin: var(--brand-ink);
+    position: relative;
+    width: 100%; min-height: 52px; border: 0; border-radius: 10px;
+    background: var(--brand); color: var(--brand-ink);
+    font: inherit; font-weight: 800; font-size: 1rem; cursor: pointer;
+  }
+  .btn.ghost { --spin: var(--brand); background: transparent; color: var(--brand); border: 1.5px solid var(--brand); }
+  .btn:disabled { cursor: wait; }
+
+  /* Bouton en chargement : le texte disparaît, un petit cercle tourne */
+  .btn.is-loading { color: transparent; pointer-events: none; opacity: 0.9; }
+  .btn.is-loading::after {
+    content: ""; position: absolute; top: 50%; left: 50%;
+    width: 22px; height: 22px; margin: -11px 0 0 -11px;
+    border: 3px solid transparent; border-top-color: var(--spin); border-right-color: var(--spin);
+    border-radius: 50%; animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .btn.is-loading::after { animation-duration: 1.6s; } }
+
+  .link-btn {
+    justify-self: start; background: none; border: 0; padding: 0; min-height: 44px;
+    color: var(--brand); font: inherit; font-weight: 700; font-size: 0.9rem;
+    text-decoration: underline; cursor: pointer;
+  }
+
+  .msg { font-size: 0.92rem; margin-top: 12px; padding: 10px 12px; border-radius: 10px; }
+  .msg:empty { display: none; }
+  .msg[data-type="err"] { color: var(--bad); background: var(--bad-soft); }
+  .msg[data-type="ok"] { color: var(--ok); background: var(--ok-soft); }
+  .msg[data-type=""] { color: var(--ink-2); background: var(--paper); }
+
+  /* ----- Choix du service ----- */
+  .services { display: grid; gap: 10px; }
+  .service { position: relative; display: block; cursor: pointer; }
+  .service input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+  .service .body {
+    display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; align-items: center;
+    padding: 14px 16px; border: 1.5px solid var(--line); border-radius: 12px; background: var(--surface);
+  }
+  .service input:checked + .body { border-color: var(--brand); background: var(--brand-soft); }
+  .service input:focus-visible + .body { outline: 3px solid var(--brand); outline-offset: 2px; }
+  .s-name { font-weight: 700; color: var(--ink); }
+  .s-meta { color: var(--ink-2); font-size: 0.85rem; }
+  .s-price { grid-row: 1 / span 2; grid-column: 2; font-weight: 800; font-size: 1.05rem; color: var(--ink); }
+
+  /* ----- Billet de confirmation ----- */
+  .ticket {
+    position: relative; overflow: hidden; background: var(--surface);
+    border: 1px solid var(--line); border-radius: 16px; padding: 24px;
+    box-shadow: 0 14px 32px -18px rgba(15, 30, 61, 0.45);
+    animation: pop 0.25s ease-out;
+  }
+  .ticket-head { display: flex; gap: 14px; align-items: center; }
+  .ticket-badge {
+    width: 44px; height: 44px; border-radius: 50%; background: var(--ok-soft); color: var(--ok);
+    display: grid; place-items: center; font-size: 1.3rem; font-weight: 800; flex: none;
+  }
+  .ticket-head h2 { margin: 0; font-size: 1.2rem; }
+  .ticket-head p { color: var(--ink-2); font-size: 0.9rem; }
+  .cut { position: relative; border-top: 2px dashed var(--line); margin: 22px -24px; }
+  .cut::before, .cut::after {
+    content: ""; position: absolute; top: -13px; width: 24px; height: 24px;
+    border-radius: 50%; background: var(--paper); border: 1px solid var(--line);
+  }
+  .cut::before { left: -12px; }
+  .cut::after { right: -12px; }
+  .ticket dl { display: grid; gap: 12px; margin-bottom: 22px; }
+  .ticket dl div { display: flex; justify-content: space-between; gap: 16px; }
+  .ticket dt { color: var(--ink-2); font-size: 0.9rem; }
+  .ticket dd { font-weight: 700; text-align: right; overflow-wrap: anywhere; }
+  @keyframes pop { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .ticket { animation: none; } }
+
+  /* ----- Mes rendez-vous ----- */
+  .item { display: grid; grid-template-columns: 58px 1fr; gap: 14px; padding: 16px 0; border-top: 1px solid var(--line); }
+  .item:first-child { border-top: 0; padding-top: 6px; }
+  .date {
+    align-self: start; border-radius: 10px; background: var(--brand-soft); color: var(--brand);
+    text-align: center; padding: 8px 0; line-height: 1.15;
+  }
+  .date strong { display: block; font-size: 1.45rem; font-weight: 800; }
+  .date span { font-size: 0.78rem; font-weight: 700; }
+  .item.past .date { background: var(--paper); color: var(--ink-2); }
+  .item-title { font-weight: 800; }
+  .item-title::first-letter { text-transform: uppercase; }
+  .item-desc { color: var(--ink-2); font-size: 0.9rem; white-space: pre-line; margin: 2px 0 8px; }
+  .chip {
+    display: inline-block; font-size: 0.75rem; font-weight: 700; padding: 3px 10px;
+    border-radius: 999px; background: var(--ok-soft); color: var(--ok);
+  }
+  .chip.muted { background: var(--paper); color: var(--ink-2); }
+  .cancel {
+    display: block; background: none; border: 0; color: var(--bad);
+    font: inherit; font-weight: 700; font-size: 0.88rem; min-height: 44px; padding: 0; cursor: pointer;
+  }
+  .empty { color: var(--ink-2); font-size: 0.92rem; }
+
+  /* ----- Barre d'appel ----- */
+  .callbar {
+    position: fixed; z-index: 250; left: 0; right: 0; bottom: 0;
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+    background: var(--band); color: #fff;
+    border-top: 1px solid rgba(255, 255, 255, 0.18);
+    display: grid; gap: 10px; max-width: 560px; margin: 0 auto;
+    border-radius: 16px 16px 0 0;
+  }
+  .callbar-info { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .callbar-info span { font-variant-numeric: tabular-nums; color: #7FE0B8; font-weight: 700; }
+  .callbar-actions { display: flex; gap: 8px; }
+  .cb-btn {
+    flex: 1; min-height: 48px; padding: 0 14px; border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.4); background: transparent; color: #fff;
+    font: inherit; font-weight: 700; font-size: 0.9rem; cursor: pointer;
+  }
+  .cb-btn.danger { background: #C0392B; border-color: #C0392B; }
+
+  footer {
+    text-align: center; color: var(--ink-2); font-size: 0.85rem;
+    padding: 0 16px calc(24px + env(safe-area-inset-bottom, 0px));
+  }
+
+  @media (max-width: 380px) { .row { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<header class="band">
+  <div class="band-in">
+    <div class="bar">
+      <div class="brand">BookFlow<i>.</i></div>
+      <div class="account" id="accountArea" hidden>
+        <div class="avatar" id="avatar" aria-hidden="true"></div>
+        <span class="account-name" id="accountName"></span>
+        <button type="button" class="logout" id="logoutBtn">Se déconnecter</button>
+      </div>
+    </div>
+    <div class="intro">
+      <h1 id="companyTitle">Chargement…</h1>
+      <p id="companyLead">Réservez votre rendez-vous en ligne.</p>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- Connexion / création de compte -->
+  <section class="card" id="authCard" hidden>
+    <h2>Votre espace client</h2>
+    <p class="sub">Un compte vous permet de réserver, d’appeler l’entreprise et de retrouver vos rendez-vous.</p>
+
+    <div class="seg" role="tablist" aria-label="Connexion ou création de compte">
+      <button type="button" role="tab" id="tabLogin" aria-selected="true">Se connecter</button>
+      <button type="button" role="tab" id="tabSignup" aria-selected="false">Créer un compte</button>
+    </div>
+
+    <form id="loginForm" novalidate>
+      <div class="field">
+        <label for="loginEmail">Adresse e-mail</label>
+        <input type="email" id="loginEmail" autocomplete="email">
+      </div>
+      <div class="field">
+        <label for="loginPassword">Mot de passe</label>
+        <input type="password" id="loginPassword" autocomplete="current-password">
+      </div>
+      <button type="button" class="link-btn" id="forgotLink">Mot de passe oublié ?</button>
+      <button type="submit" class="btn" id="loginSubmit">Se connecter</button>
+    </form>
+
+    <form id="signupForm" novalidate hidden>
+      <div class="field">
+        <label for="signupName">Nom complet</label>
+        <input type="text" id="signupName" autocomplete="name">
+      </div>
+      <div class="field">
+        <label for="signupPhone">Téléphone</label>
+        <input type="tel" id="signupPhone" autocomplete="tel">
+      </div>
+      <div class="field">
+        <label for="signupEmail">Adresse e-mail</label>
+        <input type="email" id="signupEmail" autocomplete="email">
+      </div>
+      <div class="field">
+        <label for="signupPassword">Mot de passe (6 caractères minimum)</label>
+        <input type="password" id="signupPassword" autocomplete="new-password">
+      </div>
+      <button type="submit" class="btn" id="signupSubmit">Créer mon compte</button>
+    </form>
+
+    <form id="resetForm" novalidate hidden>
+      <p class="sub">Entrez votre adresse e-mail : nous vous envoyons un lien pour choisir un nouveau mot de passe.</p>
+      <div class="field">
+        <label for="resetEmail">Adresse e-mail</label>
+        <input type="email" id="resetEmail" autocomplete="email">
+      </div>
+      <button type="submit" class="btn" id="resetSubmit">Envoyer le lien</button>
+      <button type="button" class="link-btn" id="backToLogin">Retour à la connexion</button>
+    </form>
+
+    <p class="msg" id="authMessage" role="status" aria-live="polite" data-type=""></p>
+  </section>
+
+  <!-- Nouveau mot de passe (lien reçu par e-mail) -->
+  <section class="card" id="recoveryCard" hidden>
+    <h2>Nouveau mot de passe</h2>
+    <p class="sub">Choisissez un nouveau mot de passe pour votre compte.</p>
+
+    <form id="recoveryForm" novalidate>
+      <div class="field">
+        <label for="newPassword">Nouveau mot de passe (6 caractères minimum)</label>
+        <input type="password" id="newPassword" autocomplete="new-password">
+      </div>
+      <div class="field">
+        <label for="newPassword2">Confirmer le mot de passe</label>
+        <input type="password" id="newPassword2" autocomplete="new-password">
+      </div>
+      <button type="submit" class="btn" id="recoverySubmit">Enregistrer</button>
+    </form>
+
+    <p class="msg" id="recoveryMessage" role="status" aria-live="polite" data-type=""></p>
+  </section>
+
+  <!-- Formulaire de réservation -->
+  <section class="card" id="bookingCard" hidden>
+    <h2>Réserver un rendez-vous</h2>
+    <p class="sub">Choisissez un service, puis la date et l’heure qui vous conviennent.</p>
+
+    <form id="bookingForm">
+      <fieldset>
+        <legend>Service</legend>
+        <div class="services" id="serviceList">
+          <p class="empty">Chargement des services…</p>
+        </div>
+      </fieldset>
+
+      <div class="row">
+        <div class="field">
+          <label for="bookingDate">Date</label>
+          <input type="date" id="bookingDate" required>
+        </div>
+        <div class="field">
+          <label for="bookingTime">Heure</label>
+          <input type="time" id="bookingTime" required>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="bookingPhone">Téléphone</label>
+        <input type="tel" id="bookingPhone" autocomplete="tel" required>
+      </div>
+
+      <div class="field">
+        <label for="bookingNotes">Précisions (facultatif)</label>
+        <textarea id="bookingNotes" maxlength="400"></textarea>
+      </div>
+
+      <button type="submit" class="btn" id="bookingSubmit">Confirmer ma réservation</button>
+    </form>
+
+    <p class="msg" id="bookingMessage" role="status" aria-live="polite" data-type=""></p>
+  </section>
+
+  <!-- Confirmation -->
+  <section class="ticket" id="ticketCard" hidden aria-live="polite">
+    <div class="ticket-head">
+      <div class="ticket-badge" aria-hidden="true">✓</div>
+      <div>
+        <h2>Rendez-vous confirmé</h2>
+        <p id="ticketCompany"></p>
+      </div>
+    </div>
+    <div class="cut" aria-hidden="true"></div>
+    <dl>
+      <div><dt>Service</dt><dd id="tService"></dd></div>
+      <div><dt>Date</dt><dd id="tDate"></dd></div>
+      <div><dt>Heure</dt><dd id="tTime"></dd></div>
+      <div><dt>Durée</dt><dd id="tDuration"></dd></div>
+      <div><dt>Au nom de</dt><dd id="tName"></dd></div>
+    </dl>
+    <button type="button" class="btn ghost" id="newBookingBtn">Faire une autre réservation</button>
+  </section>
+
+  <!-- Appeler l'entreprise -->
+  <section class="card" id="callCard" hidden>
+    <h2>Une question ? Appelez-nous</h2>
+    <p class="sub">Appel gratuit depuis cette page, avec le micro de votre téléphone. Vous pouvez aussi prendre rendez-vous par téléphone.</p>
+    <button type="button" class="btn ghost" id="callBtn">Appeler l’entreprise</button>
+    <p class="msg" id="callMessage" role="status" aria-live="polite" data-type=""></p>
+  </section>
+
+  <!-- Mes rendez-vous -->
+  <section class="card" id="myBookingsCard" hidden>
+    <h2>Mes rendez-vous</h2>
+    <p class="sub">Ceux que vous avez pris chez cette entreprise.</p>
+    <div id="myBookings"></div>
+  </section>
+
+</main>
+
+<footer>Réservation propulsée par BookFlow</footer>
+
+<!-- Barre d'appel en cours -->
+<div class="callbar" id="callBar" hidden>
+  <div class="callbar-info">
+    <strong id="callBarText">Appel en cours…</strong>
+    <span id="callBarTimer"></span>
+  </div>
+  <div class="callbar-actions">
+    <button type="button" class="cb-btn" id="callMute" hidden>Couper le micro</button>
+    <button type="button" class="cb-btn danger" id="callHangup">Raccrocher</button>
+  </div>
+</div>
+
+<audio id="remoteAudio" autoplay playsinline></audio>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="reserver.js"></script>
+<script src="appel-client.js"></script>
+</body>
+</html>
