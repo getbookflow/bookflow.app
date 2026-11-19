@@ -32,6 +32,28 @@
       gap: 10px;
       margin-top: 14px;
     }
+
+    /* Case à cocher : consentement à la politique de confidentialité */
+    .consent {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      line-height: 1.45;
+      color: var(--ink-2, #4A5873);
+      cursor: pointer;
+    }
+    .consent input[type="checkbox"] {
+      width: 22px;
+      height: 22px;
+      flex: none;
+      margin: 1px 0 0;
+      accent-color: var(--brand, #2457E6);
+      cursor: pointer;
+    }
+    .consent a { color: var(--brand, #2457E6); font-weight: 700; }
+    footer a { color: inherit; font-weight: 700; }
   </style>
 </head>
 <body>
@@ -105,6 +127,10 @@
             <label for="signupPassword">Mot de passe (6 caractères minimum)</label>
             <input type="password" id="signupPassword" autocomplete="new-password">
           </div>
+          <label class="consent" for="signupConsent">
+            <input type="checkbox" id="signupConsent">
+            <span>J’ai lu et j’accepte la <a href="privacy.html" target="_blank" rel="noopener">politique de confidentialité</a>.</span>
+          </label>
           <button type="submit" class="btn ghost">Créer mon compte</button>
         </form>
 
@@ -493,7 +519,10 @@
 
   </main>
 
-  <footer>© 2026 BookFlow. Tous droits réservés.</footer>
+  <footer>
+    © 2026 BookFlow. Tous droits réservés. ·
+    <a href="privacy.html" target="_blank" rel="noopener">Politique de confidentialité</a>
+  </footer>
 
   <!-- Alertes à l’écran -->
   <div class="toasts" id="toasts" aria-live="polite"></div>
@@ -527,6 +556,27 @@
   </div>
 
   <audio id="remoteAudio" autoplay playsinline></audio>
+
+  <script>
+    // Consentement : empêche la création de compte tant que la case n'est pas cochée.
+    // Placé AVANT app.js pour passer en premier.
+    document.addEventListener("submit", function (e) {
+      if (!e.target || e.target.id !== "signupForm") return;
+
+      var box = document.getElementById("signupConsent");
+      if (box && box.checked) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      var msg = document.getElementById("authMessage");
+      if (msg) {
+        msg.setAttribute("data-type", "err");
+        msg.textContent = "Cochez la case pour accepter la politique de confidentialité.";
+      }
+      if (box) box.focus();
+    }, true);
+  </script>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="app.js"></script>
