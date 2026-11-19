@@ -1,14 +1,16 @@
-document.title = "bookflow" ;
+document.title = "BookFlow";
 // ===== BookFlow : live.js =====
 // Alertes en direct (réservations), sonnerie et appels vocaux reçus dans le tableau de bord.
 // Utilise app.js (supabaseClient, $, ensureCompany, customers, loadCustomers, loadBookings...).
 
 // Serveurs qui aident deux appareils à se trouver pour l'appel vocal.
-// Pour que les appels marchent sur TOUS les réseaux mobiles, ajoutez un serveur TURN ici :
-//   { urls: "turn:adresse-du-serveur:443", username: "...", credential: "..." }
+// Les serveurs TURN servent de relais pour le son sur les réseaux mobiles (4G).
 const ICE_SERVERS = [
   { urls: "stun:stun.l.google.com:19302" },
-  { urls: "stun:stun1.l.google.com:19302" }
+  { urls: "stun:openrelay.metered.ca:80" },
+  { urls: "turn:openrelay.metered.ca:80", username: "openrelayproject", credential: "openrelayproject" },
+  { urls: "turn:openrelay.metered.ca:443", username: "openrelayproject", credential: "openrelayproject" },
+  { urls: "turn:openrelay.metered.ca:443?transport=tcp", username: "openrelayproject", credential: "openrelayproject" }
 ];
 
 /* ---------- 1. SON ---------- */
