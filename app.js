@@ -1,4 +1,4 @@
-// ===== BookFlow : app.js (version 2) =====
+// ===== BookFlow : app.js (version 3 : abonnement obligatoire) =====
 // Fichiers liés : live.js (alertes et appels en direct) et admin.js (administration)
 
 /* ---------- 1. CONNEXION SUPABASE ---------- */
@@ -42,6 +42,7 @@ function friendlyError(error) {
   if (/rate limit|too many|security purposes/i.test(m)) return "Trop de tentatives. Réessayez dans quelques minutes.";
   if (/failed to fetch|network/i.test(m)) return "Connexion internet indisponible. Vérifiez votre réseau.";
   if (/session missing|expired|invalid.*token/i.test(m)) return "Le lien a expiré. Refaites une demande.";
+  if (/row-level security|violates row-level/i.test(m)) return "Action refusée : un abonnement actif est nécessaire.";
   return m || "Une erreur est survenue.";
 }
 
@@ -110,13 +111,11 @@ const planFeatures = {
   }
 };
 
-// Un abonnement doit être actif ET non expiré
-function canUseFeature(feature) {
+// Vrai seulement si l'abonnement existe, est « active » et n'est pas expiré
+function hasActiveSubscription() {
   if (!currentSubscription) return false;
 
   const status = String(currentSubscription.status || "").toLowerCase();
-  const plan = String(currentSubscription.plan || "").trim();
-
   if (status !== "active") return false;
 
   if (currentSubscription.expires_at &&
@@ -124,6 +123,36 @@ function canUseFeature(feature) {
     return false;
   }
 
+  return true;
+}
+
+// Bloque (locked = true) ou ouvre (locked = false) l'accès au tableau de bord
+function setPaywall(locked) {
+  document.body.classList.toggle("no-sub", !!locked);
+
+  const status = $("paywallStatus");
+  if (!status) return;
+
+  if (!locked) {
+    status.textContent = "";
+    return;
+  }
+
+  if (!currentSubscription) {
+    status.textContent = "Vous n’avez pas encore d’abonnement actif. Choisissez un forfait pour accéder à BookFlow.";
+  } else if (currentSubscription.expires_at &&
+             new Date(currentSubscription.expires_at) < new Date()) {
+    status.textContent = "Votre abonnement a expiré. Renouvelez-le pour retrouver l’accès à BookFlow.";
+  } else {
+    status.textContent = "Votre abonnement n’est pas encore actif. Il sera activé dès que votre paiement sera confirmé.";
+  }
+}
+
+// Un abonnement doit être actif ET non expiré, et le forfait doit inclure la fonction
+function canUseFeature(feature) {
+  if (!hasActiveSubscription()) return false;
+
+  const plan = String(currentSubscription.plan || "").trim();
   const features = planFeatures[plan];
   return !!features && features[feature] === true;
 }
@@ -421,6 +450,11 @@ $("customerForm").addEventListener("submit", async function (event) {
 
   await withLoading(submitBtn(event), async () => {
     try {
+      if (!hasActiveSubscription()) {
+        info("Abonnement requis", "Activez un forfait pour utiliser BookFlow.", "error");
+        return;
+      }
+
       const company = await ensureCompany();
 
       const { error } = await supabaseClient.from("customers").insert({
@@ -549,6 +583,11 @@ if (serviceForm) {
 
     await withLoading(submitBtn(event), async () => {
       try {
+        if (!hasActiveSubscription()) {
+          info("Abonnement requis", "Activez un forfait pour utiliser BookFlow.", "error");
+          return;
+        }
+
         const company = await ensureCompany();
 
         const { error } = await supabaseClient.from("company_services").insert({
@@ -669,6 +708,11 @@ $("employeeForm").addEventListener("submit", async function (event) {
 
   await withLoading(submitBtn(event), async () => {
     try {
+      if (!hasActiveSubscription()) {
+        setMsg(message, "Un abonnement actif est nécessaire.", "err");
+        return;
+      }
+
       const company = await ensureCompany();
 
       const employee = {
@@ -730,12 +774,18 @@ async function loadSubscription() {
           : "");
     }
 
+    // Pas d'abonnement actif = tableau de bord bloqué
+    setPaywall(!hasActiveSubscription());
+
     return currentSubscription;
   } catch (error) {
     console.error("Erreur abonnement :", error);
     infoBox.textContent = "Erreur : " + friendlyError(error);
     currentSubscription = null;
     updatePlanFeatures();
+
+    // En cas de doute, on bloque
+    setPaywall(true);
     return null;
   }
 }
@@ -997,6 +1047,11 @@ $("bookingForm").addEventListener("submit", async function (event) {
 
   await withLoading(submitBtn(event), async () => {
     try {
+      if (!hasActiveSubscription()) {
+        info("Abonnement requis", "Activez un forfait pour utiliser BookFlow.", "error");
+        return;
+      }
+
       const company = await ensureCompany();
 
       const customerName = $("bookingCustomer").value.trim();
@@ -1160,9 +1215,13 @@ function showAuthForms(which) {
 }
 
 // Charge toutes les données après connexion (l'ordre compte : clients avant réservations)
+// Sans abonnement actif, on s'arrête après la vérification : rien d'autre n'est chargé
 async function loadAllData() {
   await ensureCompany();
   await loadSubscription();
+
+  if (!hasActiveSubscription()) return;
+
   await loadCustomers();
   await Promise.all([
     loadBookings(),
@@ -1205,7 +1264,12 @@ loginForm.addEventListener("submit", async function (event) {
       companyCache = null;
       await loadAllData();
 
-      setMsg(authMessage, "Connexion réussie ! Bienvenue sur BookFlow.", "ok");
+      if (hasActiveSubscription()) {
+        setMsg(authMessage, "Connexion réussie ! Bienvenue sur BookFlow.", "ok");
+      } else {
+        setMsg(authMessage, "Connexion réussie. Un abonnement actif est nécessaire pour accéder à BookFlow.", "");
+      }
+
       showLoggedIn();
       loginForm.reset();
     } catch (error) {
@@ -1261,7 +1325,7 @@ signupForm.addEventListener("submit", async function (event) {
       if (data.session) {
         companyCache = null;
         await loadAllData();
-        setMsg(authMessage, "Compte créé ! Bienvenue sur BookFlow.", "ok");
+        setMsg(authMessage, "Compte créé ! Choisissez un forfait pour accéder à BookFlow.", "ok");
         showLoggedIn();
       } else {
         setMsg(authMessage, "Compte créé ! Vérifiez votre e-mail pour confirmer votre inscription.", "ok");
@@ -1288,6 +1352,7 @@ function resetAppState() {
   displayBookings();
   renderCalendar();
   updatePlanFeatures();
+  setPaywall(false);
 
   $("employeeSection").hidden = true;
   $("employeeList").innerHTML = "";
@@ -1317,6 +1382,29 @@ logoutButton.addEventListener("click", async function () {
     resetAppState();
   });
 });
+
+// Bouton « J'ai payé : actualiser » : revérifie l'abonnement et ouvre l'accès s'il est actif
+const paywallRefresh = $("paywallRefresh");
+
+if (paywallRefresh) {
+  paywallRefresh.addEventListener("click", async function () {
+    await withLoading(paywallRefresh, async () => {
+      try {
+        await loadAllData();
+
+        if (hasActiveSubscription()) {
+          info("Abonnement activé", "Bienvenue sur BookFlow !", "success");
+          setMsg(authMessage, "Abonnement activé. Bienvenue sur BookFlow.", "ok");
+          $("dashboard").scrollIntoView({ behavior: "smooth" });
+        } else {
+          info("Pas encore activé", "Votre paiement n’a pas encore été confirmé.", "error");
+        }
+      } catch (error) {
+        info("Erreur", friendlyError(error), "error");
+      }
+    });
+  });
+}
 
 /* ---------- 15. MOT DE PASSE OUBLIÉ ---------- */
 function showRecoveryForm() {
@@ -1453,7 +1541,7 @@ supabaseClient.auth.getSession().then(async ({ data }) => {
   try {
     await loadAllData();
     showLoggedIn();
-    setMsg(authMessage, "Bienvenue sur BookFlow.", "");
+    setMsg(authMessage, hasActiveSubscription() ? "Bienvenue sur BookFlow." : "", "");
   } catch (error) {
     setMsg(authMessage, friendlyError(error), "err");
   }
