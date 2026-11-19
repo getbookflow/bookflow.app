@@ -7,10 +7,11 @@ document.title = "BookFlow";
 // Les serveurs TURN servent de relais pour le son sur les réseaux mobiles (4G).
 const ICE_SERVERS = [
   { urls: "stun:stun.l.google.com:19302" },
-  { urls: "stun:openrelay.metered.ca:80" },
-  { urls: "turn:openrelay.metered.ca:80", username: "openrelayproject", credential: "openrelayproject" },
-  { urls: "turn:openrelay.metered.ca:443", username: "openrelayproject", credential: "openrelayproject" },
-  { urls: "turn:openrelay.metered.ca:443?transport=tcp", username: "openrelayproject", credential: "openrelayproject" }
+  { urls: "stun:stun.relay.metered.ca:80" },
+  { urls: "turn:global.relay.metered.ca:80", username: "a046869b26fa86b27ffbf6a4", credential: "5NVIiHvrfmCGcDiz" },
+  { urls: "turn:global.relay.metered.ca:80?transport=tcp", username: "a046869b26fa86b27ffbf6a4", credential: "5NVIiHvrfmCGcDiz" },
+  { urls: "turn:global.relay.metered.ca:443", username: "a046869b26fa86b27ffbf6a4", credential: "5NVIiHvrfmCGcDiz" },
+  { urls: "turns:global.relay.metered.ca:443?transport=tcp", username: "a046869b26fa86b27ffbf6a4", credential: "5NVIiHvrfmCGcDiz" }
 ];
 
 /* ---------- 1. SON ---------- */
@@ -601,3 +602,4 @@ $("callAddBooking").addEventListener("click", () => {
   $("bookingsSection").scrollIntoView({ behavior: "smooth" });
   $("bookingDate").focus();
 });
+ 
