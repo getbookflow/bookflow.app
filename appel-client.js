@@ -125,10 +125,14 @@ async function startClientCall() {
     c.stream.getTracks().forEach((track) => pc.addTrack(track, c.stream));
 
     pc.ontrack = (e) => {
-      const audio = $("remoteAudio");
-      audio.srcObject = e.streams[0];
-      audio.play().catch(() => {});
-    };
+  const audio = $("remoteAudio");
+  audio.srcObject = e.streams[0] || new MediaStream([e.track]);
+  audio.muted = false;
+  audio.volume = 1;
+  audio.play().catch(() => {
+    document.addEventListener("click", () => audio.play(), { once: true });
+  });
+};
 
     pc.onconnectionstatechange = () => {
       if (clientCall !== c) return;
