@@ -56,6 +56,15 @@
   }
   body.in-call { padding-bottom: 130px; }
 
+  /* ----- Entreprise sans abonnement actif : on cache tout sauf le message ----- */
+  body.company-inactive #authCard,
+  body.company-inactive #bookingCard,
+  body.company-inactive #ticketCard,
+  body.company-inactive #callCard,
+  body.company-inactive #myBookingsCard {
+    display: none !important;
+  }
+
   /* ----- Bandeau du haut ----- */
   .band {
     background: var(--band);
@@ -253,8 +262,6 @@
 
   @media (max-width: 380px) { .row { grid-template-columns: 1fr; } }
 </style>
-  <link rel="icon" type="image/png" href="icon-192.png">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
 </head>
 <body>
 
@@ -276,6 +283,12 @@
 </header>
 
 <main class="wrap">
+
+  <!-- Entreprise sans abonnement actif -->
+  <section class="card" id="inactiveCard" hidden>
+    <h2>Réservations indisponibles</h2>
+    <p class="sub">Cette entreprise n’accepte pas de réservations en ligne pour le moment. Réessayez plus tard ou contactez-la directement.</p>
+  </section>
 
   <!-- Connexion / création de compte -->
   <section class="card" id="authCard" hidden>
@@ -449,5 +462,25 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="reserver.js"></script>
 <script src="appel-client.js"></script>
+<script>
+  // Vérifie que l'entreprise a un abonnement actif ; sinon affiche un message clair
+  (function () {
+    var companyId = new URLSearchParams(window.location.search).get("company");
+    if (!companyId || !window.supabase) return;
+
+    var checker = window.supabase.createClient(
+      "https://sdtjktonilnazzuynloy.supabase.co",
+      "sb_publishable_nJVppgYq0gbgk0zjPc1Ixg_XaOQaopt"
+    );
+
+    checker.rpc("company_has_active_subscription", { cid: companyId }).then(function (res) {
+      // En cas de problème technique, on ne bloque pas (la base de données protège déjà les données)
+      if (res.error || res.data !== false) return;
+
+      document.body.classList.add("company-inactive");
+      document.getElementById("inactiveCard").hidden = false;
+    });
+  })();
+</script>
 </body>
 </html>
