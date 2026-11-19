@@ -1,4 +1,4 @@
-document.title = "LIVE OK";
+document.title = "bookflow" ;
 // ===== BookFlow : live.js =====
 // Alertes en direct (réservations), sonnerie et appels vocaux reçus dans le tableau de bord.
 // Utilise app.js (supabaseClient, $, ensureCompany, customers, loadCustomers, loadBookings...).
