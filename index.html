@@ -11,8 +11,28 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
-  <link rel="icon" type="image/png" href="icon-192.png">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+  <!-- Abonnement requis : tant que l’abonnement n’est pas actif, ces parties restent cachées -->
+  <style>
+    body.no-sub #dashboard,
+    body.no-sub #clientsSection,
+    body.no-sub #servicesSection,
+    body.no-sub #bookingsSection,
+    body.no-sub #employeeSection {
+      display: none !important;
+    }
+    body.no-sub .sections a:not(#navAdmin):not([href="#pricing"]) {
+      display: none !important;
+    }
+    #paywall { display: none; }
+    body.no-sub.is-auth #paywall { display: block; }
+    #paywall .paywall-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+  </style>
 </head>
 <body>
 
@@ -115,6 +135,17 @@
 
       <p class="msg" id="authMessage" role="status" aria-live="polite" data-type=""></p>
       <button type="button" class="btn ghost sm" id="logoutButton" hidden>Se déconnecter</button>
+    </section>
+
+    <!-- Abonnement requis (visible seulement si connecté SANS abonnement actif) -->
+    <section class="card" id="paywall">
+      <h2>Activez votre abonnement</h2>
+      <p class="sub" id="paywallStatus">Vous n’avez pas encore d’abonnement actif.</p>
+      <p>Choisissez un forfait ci-dessous et envoyez votre paiement MVola. Votre tableau de bord s’ouvrira dès que votre paiement sera confirmé.</p>
+      <div class="paywall-actions">
+        <a class="btn" href="#pricing">Voir les forfaits</a>
+        <button type="button" class="btn ghost sm" id="paywallRefresh">J’ai payé : actualiser</button>
+      </div>
     </section>
 
     <!-- Tout ce bloc apparaît après la connexion -->
