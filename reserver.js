@@ -39,6 +39,8 @@ function friendly(error) {
   if (/invalid login credentials/i.test(m)) return "E-mail ou mot de passe incorrect.";
   if (/email not confirmed/i.test(m)) return "Confirmez d’abord votre adresse e-mail (vérifiez votre boîte de réception).";
   if (/already registered|already been registered/i.test(m)) return "Un compte existe déjà avec cet e-mail. Connectez-vous.";
+  // Créneau déjà pris par un autre client (règle « unique » dans Supabase)
+  if (/bookings_unique_slot|duplicate key|unique constraint/i.test(m)) return "Ce créneau vient d’être réservé par un autre client. Choisissez une autre heure.";
   if (/unable to validate email|invalid email|email address.*invalid/i.test(m)) return "Adresse e-mail invalide.";
   if (/password.*(short|least|weak|characters)/i.test(m)) return "Le mot de passe doit contenir au moins 6 caractères.";
   if (/same password|different from the old/i.test(m)) return "Le nouveau mot de passe doit être différent de l’ancien.";
